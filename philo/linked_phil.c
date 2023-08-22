@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 20:09:59 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/22 19:03:44 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/22 19:10:44 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,12 @@ t_single_p	*new_phil(int id)
 	philosopher->dead = 0;
 	philosopher->has_fork = 1;
 	philosopher->next = NULL;
-	pthread_create(&philosopher->thread, NULL, &routine, philosopher);
-	pthread_join(philosopher->thread, NULL);
+	if (pthread_create(&philosopher->thread, NULL, &routine, philosopher)
+		|| pthread_join(philosopher->thread, NULL))
+	{
+		free(philosopher);
+		philosopher = NULL;
+	}
 	return (philosopher);
 }
 
