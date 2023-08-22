@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/21 20:55:27 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/22 17:06:51 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	ft_atoi(char *s)
 	return (res);
 }
 
-void	data_init(s_philo *settings, char **av, int ac)
+void	data_init(t_settings *settings, char **av, int ac)
 {
 	settings->nbr_phil = ft_atoi(av[1]);
 	settings->time_die = ft_atoi(av[2]);
@@ -42,6 +42,12 @@ void	data_init(s_philo *settings, char **av, int ac)
 		settings->num_meals = ft_atoi(av[5]);
 	else
 		settings->num_meals = 0;
+	gettimeofday(&settings->start_sec, &settings->zone);
+	settings->arr[0] = "is thinking";
+	settings->arr[1] = "has taken a fork";
+	settings->arr[2] = "is eating";
+	settings->arr[3] = "is sleeping";
+	settings->arr[4] = "died";
 }
 
 int	check_errors(char **av)
@@ -55,30 +61,30 @@ int	check_errors(char **av)
 	return (1);
 }
 
-void	sit_in_table(s_single_p **philo, int seats)
+void	sit_in_table(t_settings *settings, int seats)
 {
 	int	i;
 
 	i = -1;
 	while (++i < seats)
 	{
-		add_back(philo, new_phil(i + 1));
+		add_back(&settings->philos, new_phil(i + 1));
+		print_state(i + 1, settings, 0);
 	}
-	find_last(*philo)->next = *philo;
+	find_last(settings->philos)->next = settings->philos;
 }
 
 int	main(int ac, char **av)
 {
-	s_philo		settings;
-	s_single_p	*philo;
+	t_settings	settings;
 
-	philo = malloc(sizeof(s_single_p));
+	settings.philos = malloc(sizeof(t_single_p));
 	if (ac < 5 || ac > 6 || !check_errors(av))
 	{
 		printf("Invalid Input!");
 		return (2);
 	}
 	data_init(&settings, av, ac);
-	sit_in_table(&philo, settings.nbr_phil);
+	sit_in_table(&settings, settings.nbr_phil);
 	return (0);
 }

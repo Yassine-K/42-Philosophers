@@ -1,4 +1,4 @@
-SRC = main.c linked_phil.c
+SRC = main.c linked_phil.c state.c
 
 OBJ =  ${SRC:.c=.o}
 
