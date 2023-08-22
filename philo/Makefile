@@ -10,7 +10,7 @@ NAME = philo
 all: ${NAME}
 
 ${NAME}: ${OBJ}
-	@gcc -Wall -Wextra -Werror $^ -o $@
+	@gcc -Wall -Wextra -Werror -pthread $^ -o $@
 
 clean:
 	@rm -rf ${OBJ}

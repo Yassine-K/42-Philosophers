@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/22 17:06:51 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/22 18:59:38 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,5 +86,8 @@ int	main(int ac, char **av)
 	}
 	data_init(&settings, av, ac);
 	sit_in_table(&settings, settings.nbr_phil);
+	// while (!settings.philos->dead)
+	// {
+	// }
 	return (0);
 }

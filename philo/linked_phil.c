@@ -6,11 +6,12 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 20:09:59 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/22 17:05:20 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/22 18:59:27 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
+#include <pthread.h>
 
 t_single_p	*new_phil(int id)
 {
@@ -22,7 +23,10 @@ t_single_p	*new_phil(int id)
 	philosopher->eating = 0;
 	philosopher->sleeping = 0;
 	philosopher->dead = 0;
+	philosopher->has_fork = 1;
 	philosopher->next = NULL;
+	pthread_create(&philosopher->thread, NULL, &routine, philosopher);
+	pthread_join(philosopher->thread, NULL);
 	return (philosopher);
 }
 
