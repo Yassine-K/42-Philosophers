@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 20:09:59 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/22 18:59:27 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/22 19:03:44 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,9 @@ t_single_p	*find_last(t_single_p *philo_list)
 
 void	add_back(t_single_p **philo_list, t_single_p *new_p)
 {
-	if (!philo_list)
+	if (!new_p)
+		*philo_list = NULL;
+	else if (!philo_list)
 		*philo_list = new_p;
 	else
 		find_last(*philo_list)->next = new_p;

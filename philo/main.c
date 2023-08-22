@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/22 18:59:38 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/22 19:06:41 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,9 +69,12 @@ void	sit_in_table(t_settings *settings, int seats)
 	while (++i < seats)
 	{
 		add_back(&settings->philos, new_phil(i + 1));
+		if (!settings->philos)
+			break ;
 		print_state(i + 1, settings, 0);
 	}
-	find_last(settings->philos)->next = settings->philos;
+	if (settings->philos)
+		find_last(settings->philos)->next = settings->philos;
 }
 
 int	main(int ac, char **av)
@@ -86,6 +89,8 @@ int	main(int ac, char **av)
 	}
 	data_init(&settings, av, ac);
 	sit_in_table(&settings, settings.nbr_phil);
+	if (!settings.philos)
+		return (2);
 	// while (!settings.philos->dead)
 	// {
 	// }
