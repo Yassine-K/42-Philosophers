@@ -6,12 +6,11 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 15:30:37 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 16:28:34 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
-#include <stdio.h>
 
 void	print_state(int id, t_settings *settings, int state)
 {
@@ -24,28 +23,43 @@ void	print_state(int id, t_settings *settings, int state)
 
 void	*routine(void *data)
 {
-	t_single_p	*f;
+	t_void_args	*args;
+	t_settings	*settings;
+	t_single_p	tmp;
+	int			fork_p[2];
 
-	f = data;
-	printf("routine: %d\n", f->id);
+	args = data;
+	settings = args->settings;
+	tmp = args->tmp;
+	if (tmp.id - 2 > -1)
+		fork_p[left] = tmp.id - 2;
+	else
+		fork_p[left] = settings->nbr_phil - 1;
+	fork_p[right] = tmp.id - 1;
 	return (data);
 }
 
-void	create_thread(t_single_p **philos)
+void	create_thread(t_single_p **philos, t_settings *settings)
 {
-	t_single_p	*tmp;
 	int			max;
+	t_void_args	*args;
+	t_single_p	*tmp;
 
 	max = 0;
 	tmp = *philos;
+	args = malloc(sizeof(t_void_args));
 	while (tmp && ++max == tmp->id)
 	{
-		if (pthread_create(&tmp->thread, NULL, &routine, tmp))
+		args->settings = settings;
+		args->tmp = *tmp;
+		if (pthread_create(&tmp->thread, NULL, &routine, args))
 			philos = NULL;
 		if (!philos)
 			break ;
+		usleep(50);
 		tmp = tmp->next;
 	}
+	free(args);
 }
 
 void	wait_for_thread(t_single_p **philos)

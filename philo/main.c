@@ -6,11 +6,12 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 15:30:16 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 16:05:50 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
+#include <stdlib.h>
 
 int	ft_atoi(char *s)
 {
@@ -67,9 +68,9 @@ int	check_errors(char **av)
 	return (1);
 }
 
-void	sit_in_table(t_settings *settings, int seats)
+void	sit_arround_table(t_settings *settings, int seats)
 {
-	int			i;
+	int	i;
 
 	i = -1;
 	settings->philos = malloc(sizeof(t_single_p));
@@ -83,26 +84,29 @@ void	sit_in_table(t_settings *settings, int seats)
 	if (settings->philos)
 	{
 		find_last(settings->philos)->next = settings->philos;
-		create_thread(&settings->philos);
+		create_thread(&settings->philos, settings);
 		wait_for_thread(&settings->philos);
 	}
 }
 
 int	main(int ac, char **av)
 {
-	t_settings	settings;
+	t_settings		settings;
 
 	if (ac < 5 || ac > 6 || !check_errors(av))
 	{
 		printf("Invalid Input!");
 		return (2);
 	}
+	pthread_mutex_init(&settings.mutex, NULL);
 	data_init(&settings, av, ac);
-	sit_in_table(&settings, settings.nbr_phil);
+	sit_arround_table(&settings, settings.nbr_phil);
 	if (!settings.philos)
 	{
-		get_out(&settings.philos);
+		no_cash_to_pay(&settings.philos);
+		pthread_mutex_destroy(&settings.mutex);
 		return (2);
 	}
+	pthread_mutex_destroy(&settings.mutex);
 	return (0);
 }
