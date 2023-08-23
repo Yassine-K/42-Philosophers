@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 22:30:31 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 22:34:36 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,26 +45,6 @@ int	check_errors(char **av)
 	return (1);
 }
 
-void	sit_arround_table(t_settings *settings, int seats)
-{
-	int	i;
-
-	i = -1;
-	settings->philos = malloc(sizeof(t_single_p));
-	while (++i < seats)
-	{
-		add_back(&settings->philos, new_phil(i + 1));
-		if (!settings->philos)
-			break ;
-	}
-	if (settings->philos)
-	{
-		find_last(settings->philos)->next = settings->philos;
-		create_thread(&settings->philos, settings);
-		wait_for_thread(&settings->philos);
-	}
-}
-
 void	bouncer(t_settings *settings)
 {
 	t_single_p		*tmp;
@@ -84,6 +64,27 @@ void	bouncer(t_settings *settings)
 	}
 }
 
+void	sit_arround_table(t_settings *settings, int seats)
+{
+	int	i;
+
+	i = -1;
+	settings->philos = malloc(sizeof(t_single_p));
+	while (++i < seats)
+	{
+		add_back(&settings->philos, new_phil(i + 1));
+		if (!settings->philos)
+			break ;
+	}
+	if (settings->philos)
+	{
+		find_last(settings->philos)->next = settings->philos;
+		create_thread(&settings->philos, settings);
+		wait_for_thread(&settings->philos);
+	}
+	bouncer(settings);
+}
+
 int	main(int ac, char **av)
 {
 	t_settings	settings;
@@ -100,7 +101,6 @@ int	main(int ac, char **av)
 		no_cash_to_pay(&settings.philos);
 		return (2);
 	}
-	bouncer(&settings);
 	no_cash_to_pay(&settings.philos);
 	return (0);
 }
