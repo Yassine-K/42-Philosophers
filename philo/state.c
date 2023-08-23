@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 21:56:20 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 22:27:23 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,12 @@ void	*routine(void *data)
 				if (settings->num_meals == tmp->rounds)
 					settings->progress = 0;
 			}
+		}
+		if (settings->nbr_phil == 1)
+		{
+			get_time(tmp, 2);
+			print_state(tmp->id, settings, 4, tmp->curr);
+			settings->progress = 0;
 		}
 	}
 	return (data);

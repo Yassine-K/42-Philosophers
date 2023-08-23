@@ -6,13 +6,11 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 21:55:58 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 22:30:31 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
-#include <sys/time.h>
-#include <time.h>
 
 void	data_init(t_settings *settings, char **av, int ac)
 {
@@ -70,16 +68,17 @@ void	sit_arround_table(t_settings *settings, int seats)
 void	bouncer(t_settings *settings)
 {
 	t_single_p		*tmp;
-	struct timeval	time;
-	time_t			curr_time;
 
 	tmp = settings->philos;
-	gettimeofday(&time, NULL);
-	curr_time = time.tv_sec * 1000 + time.tv_usec / 1000;
 	while (settings->progress)
 	{
-		if (curr_time - settings->start_sec >= settings->time_die)
+		printf("%d %ld\n", tmp->id, tmp->last_meal);
+		if (tmp->last_meal - settings->start_sec >= settings->time_die)
+		{
+			get_time(tmp, 2);
+			print_state(tmp->id, settings, 4, tmp->curr);
 			settings->progress = 0;
+		}
 		else
 			tmp = tmp->next;
 	}

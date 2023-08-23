@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 20:09:59 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 21:54:47 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 22:29:55 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ t_single_p	*find_prev(t_single_p **philo_list, int id)
 
 void	add_back(t_single_p **philo_list, t_single_p *new_p)
 {
+	if (new_p->id == 1)
+		free(*philo_list);
 	if (!new_p)
 		*philo_list = NULL;
 	else if (!philo_list || new_p->id == 1)
@@ -62,7 +64,7 @@ void	no_cash_to_pay(t_single_p **philos)
 	while ((*philos)->id < (*philos)->next->id)
 	{
 		tmp = (*philos)->next;
-		pthread_mutex_init(&tmp->mutex, NULL);
+		pthread_mutex_destroy(&tmp->mutex);
 		free(*philos);
 		*philos = tmp;
 	}
