@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/22 19:06:41 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 15:30:16 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,9 @@ int	ft_atoi(char *s)
 
 void	data_init(t_settings *settings, char **av, int ac)
 {
+	int	i;
+
+	i = -1;
 	settings->nbr_phil = ft_atoi(av[1]);
 	settings->time_die = ft_atoi(av[2]);
 	settings->time_eat = ft_atoi(av[3]);
@@ -48,6 +51,9 @@ void	data_init(t_settings *settings, char **av, int ac)
 	settings->arr[2] = "is eating";
 	settings->arr[3] = "is sleeping";
 	settings->arr[4] = "died";
+	settings->forks = (int *) malloc(sizeof(int) * settings->nbr_phil);
+	while (++i < settings->nbr_phil)
+		settings->forks[i] = 1;
 }
 
 int	check_errors(char **av)
@@ -63,9 +69,10 @@ int	check_errors(char **av)
 
 void	sit_in_table(t_settings *settings, int seats)
 {
-	int	i;
+	int			i;
 
 	i = -1;
+	settings->philos = malloc(sizeof(t_single_p));
 	while (++i < seats)
 	{
 		add_back(&settings->philos, new_phil(i + 1));
@@ -74,14 +81,17 @@ void	sit_in_table(t_settings *settings, int seats)
 		print_state(i + 1, settings, 0);
 	}
 	if (settings->philos)
+	{
 		find_last(settings->philos)->next = settings->philos;
+		create_thread(&settings->philos);
+		wait_for_thread(&settings->philos);
+	}
 }
 
 int	main(int ac, char **av)
 {
 	t_settings	settings;
 
-	settings.philos = malloc(sizeof(t_single_p));
 	if (ac < 5 || ac > 6 || !check_errors(av))
 	{
 		printf("Invalid Input!");
@@ -90,9 +100,9 @@ int	main(int ac, char **av)
 	data_init(&settings, av, ac);
 	sit_in_table(&settings, settings.nbr_phil);
 	if (!settings.philos)
+	{
+		get_out(&settings.philos);
 		return (2);
-	// while (!settings.philos->dead)
-	// {
-	// }
+	}
 	return (0);
 }
