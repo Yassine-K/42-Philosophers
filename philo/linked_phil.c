@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 20:09:59 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 15:40:04 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 21:54:47 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,10 @@ t_single_p	*new_phil(int id)
 	if (!philosopher)
 		return (NULL);
 	philosopher->id = id;
-	philosopher->thinking = 1;
 	philosopher->eating = 0;
-	philosopher->sleeping = 0;
-	philosopher->dead = 0;
+	philosopher->last_meal = 0;
+	philosopher->curr = 0;
+	pthread_mutex_init(&philosopher->mutex, NULL);
 	philosopher->next = NULL;
 	return (philosopher);
 }
@@ -33,6 +33,16 @@ t_single_p	*find_last(t_single_p *philo_list)
 	while (philo_list->next)
 		philo_list = philo_list->next;
 	return (philo_list);
+}
+
+t_single_p	*find_prev(t_single_p **philo_list, int id)
+{
+	t_single_p	*tmp;
+
+	tmp = *philo_list;
+	while (tmp->next->id != id)
+		tmp = tmp->next;
+	return (tmp);
 }
 
 void	add_back(t_single_p **philo_list, t_single_p *new_p)
@@ -52,6 +62,7 @@ void	no_cash_to_pay(t_single_p **philos)
 	while ((*philos)->id < (*philos)->next->id)
 	{
 		tmp = (*philos)->next;
+		pthread_mutex_init(&tmp->mutex, NULL);
 		free(*philos);
 		*philos = tmp;
 	}

@@ -6,36 +6,67 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 16:28:34 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 21:56:20 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
 
-void	print_state(int id, t_settings *settings, int state)
+void	print_state(int id, t_settings *settings, int state, time_t t)
 {
-	unsigned long	time;
+	time_t	time;
 
-	gettimeofday(&settings->curr_sec, &settings->zone);
-	time = settings->curr_sec.tv_sec - settings->start_sec.tv_sec;
-	printf("%lu %d %s\n", time * 1000, id, settings->arr[state]);
+	time = t - settings->start_sec;
+	printf("%ld %d %s\n", time, id, settings->arr[state]);
 }
 
 void	*routine(void *data)
 {
-	t_void_args	*args;
-	t_settings	*settings;
-	t_single_p	tmp;
-	int			fork_p[2];
+	t_void_args		*args;
+	t_settings		*settings;
+	t_single_p		*tmp;
 
 	args = data;
 	settings = args->settings;
 	tmp = args->tmp;
-	if (tmp.id - 2 > -1)
-		fork_p[left] = tmp.id - 2;
-	else
-		fork_p[left] = settings->nbr_phil - 1;
-	fork_p[right] = tmp.id - 1;
+	if (!(tmp->id % 2))
+		usleep(50);
+	while (settings->progress)
+	{
+		get_time(tmp, 2);
+		print_state(tmp->id, settings, 0, tmp->curr);
+		pthread_mutex_lock(&tmp->mutex);
+		if (settings->nbr_phil > 1)
+		{
+			get_time(tmp, 1);
+			print_state(tmp->id, settings, 1, tmp->curr);
+			pthread_mutex_lock(&find_prev(&args->tmp, tmp->id)->mutex);
+			get_time(tmp, 1);
+			print_state(tmp->id, settings, 1, tmp->curr);
+			tmp->eating = 1;
+			if (settings->progress)
+				ft_usleep(settings->time_eat, settings);
+			get_time(tmp, 1);
+			print_state(tmp->id, settings, 2, tmp->curr);
+		}
+		pthread_mutex_unlock(&tmp->mutex);
+		if (settings->nbr_phil > 1)
+			pthread_mutex_unlock(&find_prev(&args->tmp, tmp->id)->mutex);
+		if (tmp->eating)
+		{
+			tmp->eating = 0;
+			get_time(tmp, 2);
+			print_state(tmp->id, settings, 3, tmp->curr);
+			if (settings->progress)
+				ft_usleep(settings->time_sleep, settings);
+			if (settings->num_meals && tmp->rounds < settings->num_meals)
+			{
+				tmp->rounds++;
+				if (settings->num_meals == tmp->rounds)
+					settings->progress = 0;
+			}
+		}
+	}
 	return (data);
 }
 
@@ -51,7 +82,7 @@ void	create_thread(t_single_p **philos, t_settings *settings)
 	while (tmp && ++max == tmp->id)
 	{
 		args->settings = settings;
-		args->tmp = *tmp;
+		args->tmp = tmp;
 		if (pthread_create(&tmp->thread, NULL, &routine, args))
 			philos = NULL;
 		if (!philos)
@@ -76,5 +107,29 @@ void	wait_for_thread(t_single_p **philos)
 		if (!philos)
 			break ;
 		tmp = tmp->next;
+	}
+}
+
+void	get_time(void *ptr, int type)
+{
+	t_settings		*settings;
+	t_single_p		*phil;
+	struct timeval	time;
+	time_t			mil;
+
+	gettimeofday(&time, NULL);
+	mil = time.tv_sec * 1000 + time.tv_usec / 1000;
+	if (type)
+	{
+		phil = ptr;
+		if (type == 1)
+			phil->last_meal = mil;
+		else
+			phil->curr = mil;
+	}
+	else
+	{
+		settings = ptr;
+		settings->start_sec = mil;
 	}
 }

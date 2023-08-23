@@ -6,32 +6,13 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 16:05:50 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/23 21:55:58 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
-#include <stdlib.h>
-
-int	ft_atoi(char *s)
-{
-	int	i;
-	int	res;
-
-	i = 0;
-	res = 0;
-	while (s[i] && s[i] < 33)
-		i++;
-	if (s[i] == '-')
-		return (0);
-	if (s[i] == '+')
-		i++;
-	while (s[i] >= '0' && s[i] <= '9')
-		res = res * 10 + s[i++] - 48;
-	if (s[i])
-		res = 0;
-	return (res);
-}
+#include <sys/time.h>
+#include <time.h>
 
 void	data_init(t_settings *settings, char **av, int ac)
 {
@@ -46,15 +27,13 @@ void	data_init(t_settings *settings, char **av, int ac)
 		settings->num_meals = ft_atoi(av[5]);
 	else
 		settings->num_meals = 0;
-	gettimeofday(&settings->start_sec, &settings->zone);
+	get_time(settings, 0);
 	settings->arr[0] = "is thinking";
 	settings->arr[1] = "has taken a fork";
 	settings->arr[2] = "is eating";
 	settings->arr[3] = "is sleeping";
 	settings->arr[4] = "died";
-	settings->forks = (int *) malloc(sizeof(int) * settings->nbr_phil);
-	while (++i < settings->nbr_phil)
-		settings->forks[i] = 1;
+	settings->progress = 1;
 }
 
 int	check_errors(char **av)
@@ -79,7 +58,6 @@ void	sit_arround_table(t_settings *settings, int seats)
 		add_back(&settings->philos, new_phil(i + 1));
 		if (!settings->philos)
 			break ;
-		print_state(i + 1, settings, 0);
 	}
 	if (settings->philos)
 	{
@@ -89,24 +67,41 @@ void	sit_arround_table(t_settings *settings, int seats)
 	}
 }
 
+void	bouncer(t_settings *settings)
+{
+	t_single_p		*tmp;
+	struct timeval	time;
+	time_t			curr_time;
+
+	tmp = settings->philos;
+	gettimeofday(&time, NULL);
+	curr_time = time.tv_sec * 1000 + time.tv_usec / 1000;
+	while (settings->progress)
+	{
+		if (curr_time - settings->start_sec >= settings->time_die)
+			settings->progress = 0;
+		else
+			tmp = tmp->next;
+	}
+}
+
 int	main(int ac, char **av)
 {
-	t_settings		settings;
+	t_settings	settings;
 
 	if (ac < 5 || ac > 6 || !check_errors(av))
 	{
 		printf("Invalid Input!");
 		return (2);
 	}
-	pthread_mutex_init(&settings.mutex, NULL);
 	data_init(&settings, av, ac);
 	sit_arround_table(&settings, settings.nbr_phil);
 	if (!settings.philos)
 	{
 		no_cash_to_pay(&settings.philos);
-		pthread_mutex_destroy(&settings.mutex);
 		return (2);
 	}
-	pthread_mutex_destroy(&settings.mutex);
+	bouncer(&settings);
+	no_cash_to_pay(&settings.philos);
 	return (0);
 }
