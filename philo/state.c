@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 22:27:23 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/24 14:04:28 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,10 @@ void	print_state(int id, t_settings *settings, int state, time_t t)
 	time_t	time;
 
 	time = t - settings->start_sec;
-	printf("%ld %d %s\n", time, id, settings->arr[state]);
+	pthread_mutex_lock(&settings->mutex);
+	if (settings->progress)
+		printf("%ld %d %s\n", time, id, settings->arr[state]);
+	pthread_mutex_unlock(&settings->mutex);
 }
 
 void	*routine(void *data)
@@ -26,22 +29,22 @@ void	*routine(void *data)
 	t_settings		*settings;
 	t_single_p		*tmp;
 
-	args = data;
+	args = (t_void_args*) data;
 	settings = args->settings;
 	tmp = args->tmp;
 	if (!(tmp->id % 2))
-		usleep(50);
+		usleep(150);
 	while (settings->progress)
 	{
 		get_time(tmp, 2);
 		print_state(tmp->id, settings, 0, tmp->curr);
 		pthread_mutex_lock(&tmp->mutex);
+		get_time(tmp, 2);
+		print_state(tmp->id, settings, 1, tmp->curr);
 		if (settings->nbr_phil > 1)
 		{
-			get_time(tmp, 1);
-			print_state(tmp->id, settings, 1, tmp->curr);
 			pthread_mutex_lock(&find_prev(&args->tmp, tmp->id)->mutex);
-			get_time(tmp, 1);
+			get_time(tmp, 2);
 			print_state(tmp->id, settings, 1, tmp->curr);
 			tmp->eating = 1;
 			if (settings->progress)
@@ -49,16 +52,16 @@ void	*routine(void *data)
 			get_time(tmp, 1);
 			print_state(tmp->id, settings, 2, tmp->curr);
 		}
-		pthread_mutex_unlock(&tmp->mutex);
 		if (settings->nbr_phil > 1)
 			pthread_mutex_unlock(&find_prev(&args->tmp, tmp->id)->mutex);
+		pthread_mutex_unlock(&tmp->mutex);
 		if (tmp->eating)
 		{
 			tmp->eating = 0;
-			get_time(tmp, 2);
-			print_state(tmp->id, settings, 3, tmp->curr);
 			if (settings->progress)
 				ft_usleep(settings->time_sleep, settings);
+			get_time(tmp, 2);
+			print_state(tmp->id, settings, 3, tmp->curr);
 			if (settings->num_meals && tmp->rounds < settings->num_meals)
 			{
 				tmp->rounds++;
@@ -68,9 +71,13 @@ void	*routine(void *data)
 		}
 		if (settings->nbr_phil == 1)
 		{
+			ft_usleep(settings->time_die, settings);
 			get_time(tmp, 2);
-			print_state(tmp->id, settings, 4, tmp->curr);
-			settings->progress = 0;
+			if (tmp->curr -settings->start_sec >= settings->time_die)
+			{
+				print_state(tmp->id, settings, 4, tmp->curr);
+				settings->progress = 0;
+			}
 		}
 	}
 	return (data);
@@ -93,10 +100,10 @@ void	create_thread(t_single_p **philos, t_settings *settings)
 			philos = NULL;
 		if (!philos)
 			break ;
-		usleep(50);
+		usleep(150);
 		tmp = tmp->next;
 	}
-	free(args);
+	//free(args);
 }
 
 void	wait_for_thread(t_single_p **philos)
@@ -127,15 +134,15 @@ void	get_time(void *ptr, int type)
 	mil = time.tv_sec * 1000 + time.tv_usec / 1000;
 	if (type)
 	{
-		phil = ptr;
+		phil = (t_single_p *) ptr;
 		if (type == 1)
 			phil->last_meal = mil;
-		else
+		else if (type == 2)
 			phil->curr = mil;
 	}
 	else
 	{
-		settings = ptr;
+		settings = (t_settings *) ptr;
 		settings->start_sec = mil;
 	}
 }

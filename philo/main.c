@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/23 22:34:36 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/24 14:04:59 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,6 @@
 
 void	data_init(t_settings *settings, char **av, int ac)
 {
-	int	i;
-
-	i = -1;
 	settings->nbr_phil = ft_atoi(av[1]);
 	settings->time_die = ft_atoi(av[2]);
 	settings->time_eat = ft_atoi(av[3]);
@@ -32,6 +29,7 @@ void	data_init(t_settings *settings, char **av, int ac)
 	settings->arr[3] = "is sleeping";
 	settings->arr[4] = "died";
 	settings->progress = 1;
+	pthread_mutex_init(&settings->mutex, NULL);
 }
 
 int	check_errors(char **av)
@@ -48,16 +46,20 @@ int	check_errors(char **av)
 void	bouncer(t_settings *settings)
 {
 	t_single_p		*tmp;
-
+	struct timeval	time;
+	time_t			mil;
+	
 	tmp = settings->philos;
 	while (settings->progress)
 	{
-		printf("%d %ld\n", tmp->id, tmp->last_meal);
-		if (tmp->last_meal - settings->start_sec >= settings->time_die)
+		gettimeofday(&time, NULL);
+		mil = time.tv_sec * 1000 + time.tv_usec / 1000 - settings->start_sec;
+		if (mil - tmp->last_meal - settings->start_sec >= settings->time_die)
 		{
-			get_time(tmp, 2);
-			print_state(tmp->id, settings, 4, tmp->curr);
+			print_state(tmp->id, settings, 4, mil);
+			pthread_mutex_lock(&settings->mutex);
 			settings->progress = 0;
+			pthread_mutex_unlock(&settings->mutex);
 		}
 		else
 			tmp = tmp->next;
@@ -80,27 +82,31 @@ void	sit_arround_table(t_settings *settings, int seats)
 	{
 		find_last(settings->philos)->next = settings->philos;
 		create_thread(&settings->philos, settings);
+		bouncer(settings);
 		wait_for_thread(&settings->philos);
 	}
-	bouncer(settings);
 }
 
 int	main(int ac, char **av)
 {
-	t_settings	settings;
+	t_settings	*settings;
 
 	if (ac < 5 || ac > 6 || !check_errors(av))
 	{
 		printf("Invalid Input!");
 		return (2);
 	}
-	data_init(&settings, av, ac);
-	sit_arround_table(&settings, settings.nbr_phil);
-	if (!settings.philos)
+	settings = (t_settings *) malloc(sizeof(t_settings));
+	data_init(settings, av, ac);
+	sit_arround_table(settings, settings->nbr_phil);
+	if (!settings->philos)
 	{
-		no_cash_to_pay(&settings.philos);
+		no_cash_to_pay(&settings->philos);
+		pthread_mutex_destroy(&settings->mutex);
 		return (2);
 	}
-	no_cash_to_pay(&settings.philos);
+	pthread_mutex_destroy(&settings->mutex);
+	no_cash_to_pay(&settings->philos);
+	free(settings);
 	return (0);
 }
