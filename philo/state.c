@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/24 14:04:28 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/24 14:53:48 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,10 +47,10 @@ void	*routine(void *data)
 			get_time(tmp, 2);
 			print_state(tmp->id, settings, 1, tmp->curr);
 			tmp->eating = 1;
-			if (settings->progress)
-				ft_usleep(settings->time_eat, settings);
 			get_time(tmp, 1);
 			print_state(tmp->id, settings, 2, tmp->curr);
+			if (settings->progress)
+				ft_usleep(settings->time_eat, settings);
 		}
 		if (settings->nbr_phil > 1)
 			pthread_mutex_unlock(&find_prev(&args->tmp, tmp->id)->mutex);
@@ -58,10 +58,10 @@ void	*routine(void *data)
 		if (tmp->eating)
 		{
 			tmp->eating = 0;
-			if (settings->progress)
-				ft_usleep(settings->time_sleep, settings);
 			get_time(tmp, 2);
 			print_state(tmp->id, settings, 3, tmp->curr);
+			if (settings->progress)
+				ft_usleep(settings->time_sleep, settings);
 			if (settings->num_meals && tmp->rounds < settings->num_meals)
 			{
 				tmp->rounds++;

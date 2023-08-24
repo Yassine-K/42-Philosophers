@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/24 14:04:59 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/24 15:45:46 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,10 @@ void	bouncer(t_settings *settings)
 		mil = time.tv_sec * 1000 + time.tv_usec / 1000 - settings->start_sec;
 		if (mil - tmp->last_meal - settings->start_sec >= settings->time_die)
 		{
-			print_state(tmp->id, settings, 4, mil);
 			pthread_mutex_lock(&settings->mutex);
 			settings->progress = 0;
 			pthread_mutex_unlock(&settings->mutex);
+			print_state(tmp->id, settings, 4, mil);
 		}
 		else
 			tmp = tmp->next;
