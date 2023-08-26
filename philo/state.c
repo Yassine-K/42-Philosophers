@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/26 22:32:38 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/26 22:41:40 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	*routine(void *data)
 	t_settings		*settings;
 	t_single_p		*tmp;
 
-	args = (t_void_args*) data;
+	args = (t_void_args *) data;
 	settings = args->settings;
 	tmp = args->tmp;
 	if (!(tmp->id % 2))
@@ -86,7 +86,7 @@ void	*routine(void *data)
 	return (data);
 }
 
-void	create_thread(t_single_p **philos, t_settings *settings)
+t_void_args	*create_thread(t_single_p **philos, t_settings *settings)
 {
 	int			max;
 	t_void_args	*args;
@@ -106,7 +106,7 @@ void	create_thread(t_single_p **philos, t_settings *settings)
 		usleep(150);
 		tmp = tmp->next;
 	}
-	//free(args);
+	return (args);
 }
 
 void	wait_for_thread(t_single_p **philos)

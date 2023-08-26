@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:24 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/26 22:17:09 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/26 22:41:33 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void		add_back(t_single_p **philo_list, t_single_p *new_p);
 void		print_state(int id, t_settings *settings, int state, time_t t);
 void		*routine(void *data);
 void		no_cash_to_pay(t_single_p **philos);
-void		create_thread(t_single_p **philos, t_settings *settings);
+t_void_args	*create_thread(t_single_p **philos, t_settings *settings);
 void		wait_for_thread(t_single_p **philos);
 void		get_time(void *ptr, int type);
 void		ft_usleep(time_t t, t_settings *t_settings);

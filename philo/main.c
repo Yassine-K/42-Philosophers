@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/26 22:31:49 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/26 22:43:42 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void	bouncer(t_settings *settings)
 	struct timeval	time;
 	time_t			mil;
 	time_t			start;
-	
+
 	tmp = settings->philos;
 	while (settings->progress)
 	{
@@ -75,7 +75,8 @@ void	bouncer(t_settings *settings)
 
 void	sit_arround_table(t_settings *settings, int seats)
 {
-	int	i;
+	int			i;
+	t_void_args	*args;
 
 	i = -1;
 	settings->philos = malloc(sizeof(t_single_p));
@@ -88,9 +89,10 @@ void	sit_arround_table(t_settings *settings, int seats)
 	if (settings->philos)
 	{
 		find_last(settings->philos)->next = settings->philos;
-		create_thread(&settings->philos, settings);
+		args = create_thread(&settings->philos, settings);
 		bouncer(settings);
 		wait_for_thread(&settings->philos);
+		free(args);
 	}
 }
 
@@ -115,5 +117,6 @@ int	main(int ac, char **av)
 	pthread_mutex_destroy(&settings->mutex);
 	no_cash_to_pay(&settings->philos);
 	free(settings);
+	while (1);
 	return (0);
 }
