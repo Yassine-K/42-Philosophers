@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/24 15:45:46 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/26 18:22:04 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void	bouncer(t_settings *settings)
 			pthread_mutex_lock(&settings->mutex);
 			settings->progress = 0;
 			pthread_mutex_unlock(&settings->mutex);
-			print_state(tmp->id, settings, 4, mil);
+			printf("%ld %d %s\n", mil, tmp->id, "is dead");
 		}
 		else
 			tmp = tmp->next;

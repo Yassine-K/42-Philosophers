@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/24 14:53:48 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/26 18:23:15 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,12 +38,12 @@ void	*routine(void *data)
 	{
 		get_time(tmp, 2);
 		print_state(tmp->id, settings, 0, tmp->curr);
-		pthread_mutex_lock(&tmp->mutex);
 		get_time(tmp, 2);
 		print_state(tmp->id, settings, 1, tmp->curr);
 		if (settings->nbr_phil > 1)
 		{
 			pthread_mutex_lock(&find_prev(&args->tmp, tmp->id)->mutex);
+			pthread_mutex_lock(&tmp->mutex);
 			get_time(tmp, 2);
 			print_state(tmp->id, settings, 1, tmp->curr);
 			tmp->eating = 1;
@@ -51,10 +51,9 @@ void	*routine(void *data)
 			print_state(tmp->id, settings, 2, tmp->curr);
 			if (settings->progress)
 				ft_usleep(settings->time_eat, settings);
-		}
-		if (settings->nbr_phil > 1)
+			pthread_mutex_unlock(&tmp->mutex);
 			pthread_mutex_unlock(&find_prev(&args->tmp, tmp->id)->mutex);
-		pthread_mutex_unlock(&tmp->mutex);
+		}
 		if (tmp->eating)
 		{
 			tmp->eating = 0;
@@ -65,8 +64,6 @@ void	*routine(void *data)
 			if (settings->num_meals && tmp->rounds < settings->num_meals)
 			{
 				tmp->rounds++;
-				if (settings->num_meals == tmp->rounds)
-					settings->progress = 0;
 			}
 		}
 		if (settings->nbr_phil == 1)
