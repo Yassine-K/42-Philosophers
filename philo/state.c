@@ -6,11 +6,12 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/26 18:23:15 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/26 22:32:38 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
+#include <unistd.h>
 
 void	print_state(int id, t_settings *settings, int state, time_t t)
 {
@@ -64,13 +65,18 @@ void	*routine(void *data)
 			if (settings->num_meals && tmp->rounds < settings->num_meals)
 			{
 				tmp->rounds++;
+				pthread_mutex_lock(&settings->mutex);
+				settings->num_rounds++;
+				if (settings->num_rounds >= settings->nbr_phil * settings->num_meals)
+					settings->progress = 0;
+				pthread_mutex_unlock(&settings->mutex);
 			}
 		}
 		if (settings->nbr_phil == 1)
 		{
 			ft_usleep(settings->time_die, settings);
 			get_time(tmp, 2);
-			if (tmp->curr -settings->start_sec >= settings->time_die)
+			if (tmp->curr - settings->start_sec >= settings->time_die)
 			{
 				print_state(tmp->id, settings, 4, tmp->curr);
 				settings->progress = 0;

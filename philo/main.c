@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/26 18:22:04 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/26 22:31:49 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ void	data_init(t_settings *settings, char **av, int ac)
 	settings->arr[3] = "is sleeping";
 	settings->arr[4] = "died";
 	settings->progress = 1;
+	settings->num_rounds = 0;
 	pthread_mutex_init(&settings->mutex, NULL);
 }
 
@@ -48,13 +49,19 @@ void	bouncer(t_settings *settings)
 	t_single_p		*tmp;
 	struct timeval	time;
 	time_t			mil;
+	time_t			start;
 	
 	tmp = settings->philos;
 	while (settings->progress)
 	{
 		gettimeofday(&time, NULL);
 		mil = time.tv_sec * 1000 + time.tv_usec / 1000 - settings->start_sec;
-		if (mil - tmp->last_meal - settings->start_sec >= settings->time_die)
+		pthread_mutex_lock(&tmp->mutex);
+		start = tmp->last_meal - settings->start_sec;
+		pthread_mutex_unlock(&tmp->mutex);
+		if (start < 0)
+			start = 0;
+		if (mil - start >= settings->time_die)
 		{
 			pthread_mutex_lock(&settings->mutex);
 			settings->progress = 0;

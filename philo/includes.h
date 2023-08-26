@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:24 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/24 12:31:41 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/26 22:17:09 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ typedef struct s_settings{
 	int				time_eat;
 	int				time_sleep;
 	int				num_meals;
+	int				num_rounds;
 	char			*arr[5];
 	pthread_mutex_t	mutex;
 	int				progress;
