@@ -1,16 +1,16 @@
 SRC = main.c linked_phil.c state.c helpers.c
 
 OBJ =  ${SRC:.c=.o}
-
+WWW = -Wall -Wextra -Werror #-fsanitize=thread -g
 NAME = philo
 
 %.o: %.c
-	@gcc -Wall -Wextra -Werror -c $< -o $@
+	@gcc ${WWW} -c $< -o $@
 
 all: ${NAME}
 
 ${NAME}: ${OBJ}
-	@gcc -Wall -Wextra -Werror -pthread $^ -o $@
+	@gcc ${WWW} -pthread $^ -o $@
 
 clean:
 	@rm -rf ${OBJ}

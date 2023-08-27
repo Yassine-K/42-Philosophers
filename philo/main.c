@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/26 22:43:42 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/27 16:41:00 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,5 @@ int	main(int ac, char **av)
 	pthread_mutex_destroy(&settings->mutex);
 	no_cash_to_pay(&settings->philos);
 	free(settings);
-	while (1);
 	return (0);
 }

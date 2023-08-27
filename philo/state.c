@@ -6,12 +6,11 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/26 22:41:40 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/27 16:57:13 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
-#include <unistd.h>
 
 void	print_state(int id, t_settings *settings, int state, time_t t)
 {
@@ -34,7 +33,7 @@ void	*routine(void *data)
 	settings = args->settings;
 	tmp = args->tmp;
 	if (!(tmp->id % 2))
-		usleep(150);
+		usleep(100);
 	while (settings->progress)
 	{
 		get_time(tmp, 2);
@@ -103,7 +102,7 @@ t_void_args	*create_thread(t_single_p **philos, t_settings *settings)
 			philos = NULL;
 		if (!philos)
 			break ;
-		usleep(150);
+		usleep(100);
 		tmp = tmp->next;
 	}
 	return (args);
