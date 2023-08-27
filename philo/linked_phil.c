@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 20:09:59 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/27 16:57:32 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/27 17:48:40 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,4 +68,5 @@ void	no_cash_to_pay(t_single_p **philos)
 		free(*philos);
 		*philos = tmp;
 	}
+	free(*philos);
 }
