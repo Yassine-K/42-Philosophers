@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/27 17:49:04 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/27 18:11:26 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,9 @@ void	sit_arround_table(t_settings *settings, int seats)
 	}
 	if (settings->philos)
 	{
+		pthread_mutex_lock(&settings->mutex);
 		find_last(settings->philos)->next = settings->philos;
+		pthread_mutex_unlock(&settings->mutex);
 		args = create_thread(&settings->philos, settings);
 		bouncer(settings);
 		wait_for_thread(&settings->philos);

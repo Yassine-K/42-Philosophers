@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 21:54:31 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/24 14:02:04 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/27 18:23:02 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,13 @@ void	ft_usleep(time_t t, t_settings *settings)
 	later = now + t;
 	while (now < later && settings->progress)
 	{
+		pthread_mutex_lock(&settings->mutex);
+		if (!settings->progress)
+		{
+			pthread_mutex_unlock(&settings->mutex);
+			break ;
+		}
+		pthread_mutex_unlock(&settings->mutex);
 		usleep(100);
 		gettimeofday(&time, NULL);
 		now = time.tv_sec * 1000 + time.tv_usec / 1000 - settings->start_sec;

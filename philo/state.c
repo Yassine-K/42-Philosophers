@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/27 16:57:13 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/08/27 18:19:07 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,12 @@ void	*routine(void *data)
 	t_single_p		*tmp;
 
 	args = (t_void_args *) data;
+		pthread_mutex_lock(&args->settings->mutex);
 	settings = args->settings;
+		pthread_mutex_unlock(&args->settings->mutex);
+		pthread_mutex_lock(&args->mutex);
 	tmp = args->tmp;
+		pthread_mutex_unlock(&args->mutex);
 	if (!(tmp->id % 2))
 		usleep(100);
 	while (settings->progress)
@@ -49,7 +53,7 @@ void	*routine(void *data)
 			tmp->eating = 1;
 			get_time(tmp, 1);
 			print_state(tmp->id, settings, 2, tmp->curr);
-			if (settings->progress)
+			//if (settings->progress)
 				ft_usleep(settings->time_eat, settings);
 			pthread_mutex_unlock(&tmp->mutex);
 			pthread_mutex_unlock(&find_prev(&args->tmp, tmp->id)->mutex);
@@ -96,8 +100,12 @@ t_void_args	*create_thread(t_single_p **philos, t_settings *settings)
 	args = malloc(sizeof(t_void_args));
 	while (tmp && ++max == tmp->id)
 	{
+		pthread_mutex_lock(&settings->mutex);
 		args->settings = settings;
+		pthread_mutex_unlock(&settings->mutex);
+		pthread_mutex_lock(&args->mutex);
 		args->tmp = tmp;
+		pthread_mutex_unlock(&args->mutex);
 		if (pthread_create(&tmp->thread, NULL, &routine, args))
 			philos = NULL;
 		if (!philos)
