@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:24 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/27 17:49:12 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/03 14:45:22 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ typedef struct s_single_p{
 	pthread_mutex_t		mutex;
 	pthread_t			thread;
 	struct s_single_p	*next;
+	struct s_settings	*settings;
 }	t_single_p;
 
 typedef struct s_settings{
@@ -55,13 +56,13 @@ void		add_back(t_single_p **philo_list, t_single_p *new_p);
 void		print_state(int id, t_settings *settings, int state, time_t t);
 void		*routine(void *data);
 void		no_cash_to_pay(t_single_p **philos);
-t_void_args	*create_thread(t_single_p **philos, t_settings *settings);
+void		create_thread(t_single_p **philos, t_settings *settings);
 void		wait_for_thread(t_single_p **philos);
 void		get_time(void *ptr, int type);
 void		ft_usleep(time_t t, t_settings *t_settings);
 int			ft_atoi(char *s);
 t_single_p	*new_phil(int id);
 t_single_p	*find_last(t_single_p *philo_list);
-t_single_p	*find_prev(t_single_p **philo_list, int id);
+t_single_p	*find_prev(t_single_p *philo_list, int id);
 
 #endif

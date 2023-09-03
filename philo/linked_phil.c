@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 20:09:59 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/27 18:10:06 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/03 14:45:35 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,11 +35,11 @@ t_single_p	*find_last(t_single_p *philo_list)
 	return (philo_list);
 }
 
-t_single_p	*find_prev(t_single_p **philo_list, int id)
+t_single_p	*find_prev(t_single_p *philo_list, int id)
 {
 	t_single_p	*tmp;
 
-	tmp = *philo_list;
+	tmp = philo_list;
 	while (tmp->next->id != id)
 		tmp = tmp->next;
 	return (tmp);

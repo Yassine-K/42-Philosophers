@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/27 18:19:07 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/03 14:45:47 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,17 +25,13 @@ void	print_state(int id, t_settings *settings, int state, time_t t)
 
 void	*routine(void *data)
 {
-	t_void_args		*args;
 	t_settings		*settings;
 	t_single_p		*tmp;
 
-	args = (t_void_args *) data;
-		pthread_mutex_lock(&args->settings->mutex);
-	settings = args->settings;
-		pthread_mutex_unlock(&args->settings->mutex);
-		pthread_mutex_lock(&args->mutex);
-	tmp = args->tmp;
-		pthread_mutex_unlock(&args->mutex);
+	tmp = (t_single_p *) data;
+	pthread_mutex_lock(&tmp->settings->mutex);
+	settings = tmp->settings;
+	pthread_mutex_unlock(&tmp->settings->mutex);
 	if (!(tmp->id % 2))
 		usleep(100);
 	while (settings->progress)
@@ -46,17 +42,16 @@ void	*routine(void *data)
 		print_state(tmp->id, settings, 1, tmp->curr);
 		if (settings->nbr_phil > 1)
 		{
-			pthread_mutex_lock(&find_prev(&args->tmp, tmp->id)->mutex);
+			pthread_mutex_lock(&find_prev(tmp, tmp->id)->mutex);
 			pthread_mutex_lock(&tmp->mutex);
 			get_time(tmp, 2);
 			print_state(tmp->id, settings, 1, tmp->curr);
 			tmp->eating = 1;
 			get_time(tmp, 1);
 			print_state(tmp->id, settings, 2, tmp->curr);
-			//if (settings->progress)
 				ft_usleep(settings->time_eat, settings);
 			pthread_mutex_unlock(&tmp->mutex);
-			pthread_mutex_unlock(&find_prev(&args->tmp, tmp->id)->mutex);
+			pthread_mutex_unlock(&find_prev(tmp, tmp->id)->mutex);
 		}
 		if (tmp->eating)
 		{
@@ -89,31 +84,25 @@ void	*routine(void *data)
 	return (data);
 }
 
-t_void_args	*create_thread(t_single_p **philos, t_settings *settings)
+void	create_thread(t_single_p **philos, t_settings *settings)
 {
 	int			max;
-	t_void_args	*args;
 	t_single_p	*tmp;
 
 	max = 0;
 	tmp = *philos;
-	args = malloc(sizeof(t_void_args));
 	while (tmp && ++max == tmp->id)
 	{
 		pthread_mutex_lock(&settings->mutex);
-		args->settings = settings;
+		tmp->settings = settings;
 		pthread_mutex_unlock(&settings->mutex);
-		pthread_mutex_lock(&args->mutex);
-		args->tmp = tmp;
-		pthread_mutex_unlock(&args->mutex);
-		if (pthread_create(&tmp->thread, NULL, &routine, args))
+		if (pthread_create(&tmp->thread, NULL, &routine, tmp))
 			philos = NULL;
 		if (!philos)
 			break ;
 		usleep(100);
 		tmp = tmp->next;
 	}
-	return (args);
 }
 
 void	wait_for_thread(t_single_p **philos)
