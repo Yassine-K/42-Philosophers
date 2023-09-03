@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/03 14:45:47 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/03 14:51:18 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,10 @@ void	*routine(void *data)
 	pthread_mutex_unlock(&tmp->settings->mutex);
 	if (!(tmp->id % 2))
 		usleep(100);
+	pthread_mutex_lock(&settings->mutex);
 	while (settings->progress)
 	{
+		pthread_mutex_unlock(&settings->mutex);
 		get_time(tmp, 2);
 		print_state(tmp->id, settings, 0, tmp->curr);
 		get_time(tmp, 2);
@@ -80,7 +82,9 @@ void	*routine(void *data)
 				settings->progress = 0;
 			}
 		}
+		pthread_mutex_lock(&settings->mutex);
 	}
+	pthread_mutex_unlock(&settings->mutex);
 	return (data);
 }
 
