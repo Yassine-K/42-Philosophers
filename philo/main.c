@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/08/27 17:49:04 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/03 15:45:04 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void	bouncer(t_settings *settings)
 	time_t			start;
 
 	tmp = settings->philos;
-	while (settings->progress)
+	while (check_val(&settings->mutex, &settings->progress))
 	{
 		gettimeofday(&time, NULL);
 		mil = time.tv_sec * 1000 + time.tv_usec / 1000 - settings->start_sec;
@@ -76,7 +76,6 @@ void	bouncer(t_settings *settings)
 void	sit_arround_table(t_settings *settings, int seats)
 {
 	int			i;
-	t_void_args	*args;
 
 	i = -1;
 	settings->philos = malloc(sizeof(t_single_p));
@@ -88,11 +87,12 @@ void	sit_arround_table(t_settings *settings, int seats)
 	}
 	if (settings->philos)
 	{
+		pthread_mutex_lock(&settings->mutex);
 		find_last(settings->philos)->next = settings->philos;
-		args = create_thread(&settings->philos, settings);
+		pthread_mutex_unlock(&settings->mutex);
+		create_thread(&settings->philos, settings);
 		bouncer(settings);
 		wait_for_thread(&settings->philos);
-		free(args);
 	}
 }
 
