@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:24 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/03 14:45:22 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/03 15:29:15 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ void		create_thread(t_single_p **philos, t_settings *settings);
 void		wait_for_thread(t_single_p **philos);
 void		get_time(void *ptr, int type);
 void		ft_usleep(time_t t, t_settings *t_settings);
+int			check_val(pthread_mutex_t *mtx, int *val);
 int			ft_atoi(char *s);
 t_single_p	*new_phil(int id);
 t_single_p	*find_last(t_single_p *philo_list);
