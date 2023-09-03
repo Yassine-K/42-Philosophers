@@ -6,29 +6,53 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/03 15:32:01 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/03 16:47:36 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
 
-void	print_state(int id, t_settings *settings, int state, time_t t)
+void	take_forks(t_single_p *tmp, t_settings *settings)
 {
-	time_t	time;
-
-	time = t - settings->start_sec;
-	if (check_val(&settings->mutex, &settings->progress))
-		printf("%ld %d %s\n", time, id, settings->arr[state]);
+	get_time(tmp, 2);
+	print_state(tmp->id, settings, 0, tmp->curr);
+	get_time(tmp, 2);
+	print_state(tmp->id, settings, 1, tmp->curr);
+	if (settings->nbr_phil > 1)
+	{
+		pthread_mutex_lock(&find_prev(tmp, tmp->id)->mutex);
+		pthread_mutex_lock(&tmp->mutex);
+		get_time(tmp, 2);
+		print_state(tmp->id, settings, 1, tmp->curr);
+		tmp->eating = 1;
+		get_time(tmp, 1);
+		print_state(tmp->id, settings, 2, tmp->curr);
+		ft_usleep(settings->time_eat, settings);
+		pthread_mutex_unlock(&tmp->mutex);
+		pthread_mutex_unlock(&find_prev(tmp, tmp->id)->mutex);
+	}
 }
 
-int	check_val(pthread_mutex_t *mtx, int *val)
+void	start_eating(t_single_p *tmp, t_settings *settings)
 {
-	int ret;
-	
-	pthread_mutex_lock(mtx);
-	ret = *val;
-	pthread_mutex_unlock(mtx);
-	return (ret);
+	if (tmp->eating)
+	{
+		tmp->eating = 0;
+		get_time(tmp, 2);
+		print_state(tmp->id, settings, 3, tmp->curr);
+		if (check_val(&settings->mutex, &settings->progress))
+			ft_usleep(settings->time_sleep, settings);
+		if (settings->num_meals && tmp->rounds < settings->num_meals)
+		{
+			tmp->rounds++;
+			pthread_mutex_lock(&settings->mutex);
+			settings->num_rounds++;
+			if (settings->num_rounds >= settings->nbr_phil
+				* settings->num_meals)
+				settings->progress = 0;
+			pthread_mutex_unlock(&settings->mutex);
+		}
+	}
 }
 
 void	*routine(void *data)
@@ -44,40 +68,8 @@ void	*routine(void *data)
 		usleep(100);
 	while (check_val(&settings->mutex, &settings->progress))
 	{
-		get_time(tmp, 2);
-		print_state(tmp->id, settings, 0, tmp->curr);
-		get_time(tmp, 2);
-		print_state(tmp->id, settings, 1, tmp->curr);
-		if (settings->nbr_phil > 1)
-		{
-			pthread_mutex_lock(&find_prev(tmp, tmp->id)->mutex);
-			pthread_mutex_lock(&tmp->mutex);
-			get_time(tmp, 2);
-			print_state(tmp->id, settings, 1, tmp->curr);
-			tmp->eating = 1;
-			get_time(tmp, 1);
-			print_state(tmp->id, settings, 2, tmp->curr);
-				ft_usleep(settings->time_eat, settings);
-			pthread_mutex_unlock(&tmp->mutex);
-			pthread_mutex_unlock(&find_prev(tmp, tmp->id)->mutex);
-		}
-		if (tmp->eating)
-		{
-			tmp->eating = 0;
-			get_time(tmp, 2);
-			print_state(tmp->id, settings, 3, tmp->curr);
-			if (check_val(&settings->mutex, &settings->progress))
-				ft_usleep(settings->time_sleep, settings);
-			if (settings->num_meals && tmp->rounds < settings->num_meals)
-			{
-				tmp->rounds++;
-				pthread_mutex_lock(&settings->mutex);
-				settings->num_rounds++;
-				if (settings->num_rounds >= settings->nbr_phil * settings->num_meals)
-					settings->progress = 0;
-				pthread_mutex_unlock(&settings->mutex);
-			}
-		}
+		take_forks(tmp, settings);
+		start_eating(tmp, settings);
 		if (settings->nbr_phil == 1)
 		{
 			ft_usleep(settings->time_die, settings);
@@ -127,29 +119,5 @@ void	wait_for_thread(t_single_p **philos)
 		if (!philos)
 			break ;
 		tmp = tmp->next;
-	}
-}
-
-void	get_time(void *ptr, int type)
-{
-	t_settings		*settings;
-	t_single_p		*phil;
-	struct timeval	time;
-	time_t			mil;
-
-	gettimeofday(&time, NULL);
-	mil = time.tv_sec * 1000 + time.tv_usec / 1000;
-	if (type)
-	{
-		phil = (t_single_p *) ptr;
-		if (type == 1)
-			phil->last_meal = mil;
-		else if (type == 2)
-			phil->curr = mil;
-	}
-	else
-	{
-		settings = (t_settings *) ptr;
-		settings->start_sec = mil;
 	}
 }
