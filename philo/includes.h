@@ -55,7 +55,7 @@ typedef struct s_void_arg{
 void		add_back(t_single_p **philo_list, t_single_p *new_p);
 void		print_state(int id, t_settings *settings, int state, time_t t);
 void		*routine(void *data);
-void		no_cash_to_pay(t_single_p **philos);
+void		no_cash_to_pay(t_single_p **philos, int nbr);
 void		create_thread(t_single_p **philos, t_settings *settings);
 void		wait_for_thread(t_single_p **philos);
 void		get_time(void *ptr, int type);

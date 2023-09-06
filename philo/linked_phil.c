@@ -57,16 +57,19 @@ void	add_back(t_single_p **philo_list, t_single_p *new_p)
 		find_last(*philo_list)->next = new_p;
 }
 
-void	no_cash_to_pay(t_single_p **philos)
+void	no_cash_to_pay(t_single_p **philos, int nbr)
 {
 	t_single_p	*tmp;
+	int			i;
 
-	while ((*philos)->id < (*philos)->next->id)
+	i = -1;
+	while (++i < nbr)
 	{
 		tmp = (*philos)->next;
 		pthread_mutex_destroy(&tmp->mutex);
 		free(*philos);
 		*philos = tmp;
 	}
+	printf("tmp %d\n", tmp->id);
 	free(*philos);
 }

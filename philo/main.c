@@ -110,12 +110,12 @@ int	main(int ac, char **av)
 	sit_arround_table(settings, settings->nbr_phil);
 	if (!settings->philos)
 	{
-		no_cash_to_pay(&settings->philos);
+		no_cash_to_pay(&settings->philos, settings->nbr_phil);
 		pthread_mutex_destroy(&settings->mutex);
 		return (2);
 	}
 	pthread_mutex_destroy(&settings->mutex);
-	no_cash_to_pay(&settings->philos);
+	no_cash_to_pay(&settings->philos, settings->nbr_phil);
 	free(settings);
 	return (0);
 }
