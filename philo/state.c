@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/03 16:47:36 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/11 16:28:50 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,43 +14,49 @@
 
 void	take_forks(t_single_p *tmp, t_settings *settings)
 {
-	get_time(tmp, 2);
-	print_state(tmp->id, settings, 0, tmp->curr);
-	get_time(tmp, 2);
-	print_state(tmp->id, settings, 1, tmp->curr);
-	if (settings->nbr_phil > 1)
+	if (check_val(&settings->mutex, &settings->progress))
 	{
-		pthread_mutex_lock(&find_prev(tmp, tmp->id)->mutex);
-		pthread_mutex_lock(&tmp->mutex);
+		get_time(tmp, 2);
+		print_state(tmp->id, settings, 0, tmp->curr);
 		get_time(tmp, 2);
 		print_state(tmp->id, settings, 1, tmp->curr);
-		tmp->eating = 1;
-		get_time(tmp, 1);
-		print_state(tmp->id, settings, 2, tmp->curr);
-		ft_usleep(settings->time_eat, settings);
-		pthread_mutex_unlock(&tmp->mutex);
-		pthread_mutex_unlock(&find_prev(tmp, tmp->id)->mutex);
+		if (settings->nbr_phil > 1)
+		{
+			pthread_mutex_lock(&find_prev(tmp, tmp->id)->mutex);
+			pthread_mutex_lock(&tmp->mutex);
+			get_time(tmp, 2);
+			print_state(tmp->id, settings, 1, tmp->curr);
+			tmp->eating = 1;
+			get_time(tmp, 1);
+			print_state(tmp->id, settings, 2, tmp->curr);
+			ft_usleep(settings->time_eat, settings);
+			pthread_mutex_unlock(&tmp->mutex);
+			pthread_mutex_unlock(&find_prev(tmp, tmp->id)->mutex);
+		}
 	}
 }
 
 void	start_eating(t_single_p *tmp, t_settings *settings)
 {
-	if (tmp->eating)
+	if (check_val(&settings->mutex, &settings->progress))
 	{
-		tmp->eating = 0;
-		get_time(tmp, 2);
-		print_state(tmp->id, settings, 3, tmp->curr);
-		if (check_val(&settings->mutex, &settings->progress))
-			ft_usleep(settings->time_sleep, settings);
-		if (settings->num_meals && tmp->rounds < settings->num_meals)
+		if (tmp->eating)
 		{
-			tmp->rounds++;
-			pthread_mutex_lock(&settings->mutex);
-			settings->num_rounds++;
-			if (settings->num_rounds >= settings->nbr_phil
-				* settings->num_meals)
-				settings->progress = 0;
-			pthread_mutex_unlock(&settings->mutex);
+			tmp->eating = 0;
+			get_time(tmp, 2);
+			print_state(tmp->id, settings, 3, tmp->curr);
+			if (check_val(&settings->mutex, &settings->progress))
+				ft_usleep(settings->time_sleep, settings);
+			if (settings->num_meals && tmp->rounds < settings->num_meals)
+			{
+				tmp->rounds++;
+				pthread_mutex_lock(&settings->mutex);
+				settings->num_rounds++;
+				if (settings->num_rounds >= settings->nbr_phil
+					* settings->num_meals)
+					settings->progress = 0;
+				pthread_mutex_unlock(&settings->mutex);
+			}
 		}
 	}
 }
