@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/16 20:40:23 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/16 20:42:02 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ void	data_init(t_settings *settings, char **av, int ac)
 	else
 		settings->num_meals = 0;
 	get_time(settings, 0);
+	settings->start_sec += 300;
 	settings->arr[0] = "is thinking";
 	settings->arr[1] = "has taken a fork";
 	settings->arr[2] = "is eating";
