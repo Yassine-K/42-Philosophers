@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 21:54:31 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 16:43:29 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 17:05:39 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,5 +100,6 @@ void	no_cash_to_pay(t_settings *settings)
 	sem_unlink("/Death");
 	sem_unlink("/Print");
 	sem_unlink("/Pay");
+	free(settings->pids);
 	free(settings);
 }
