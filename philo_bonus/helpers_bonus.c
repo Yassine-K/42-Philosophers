@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 21:54:31 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 13:43:43 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 15:36:58 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,11 @@ void	get_time(t_settings *settings, int type)
 {
 	struct timeval	time;
 	time_t			mil;
+	time_t			s;
 
 	gettimeofday(&time, NULL);
-	mil = time.tv_sec * 1000 + time.tv_usec / 1000;
+	s = 0;
+	mil = time.tv_sec * 1000 + (time.tv_usec + s) / 1000;
 	if (!type)
 		settings->start_sec = mil;
 	else if (type == 1)
@@ -72,11 +74,16 @@ void	print_state(int id, t_settings *settings, int state, time_t t)
 	time_t	time;
 
 	time = t - settings->start_sec;
-	sem_wait(settings->print);
-	if (settings->progress)
-		printf("%ld %d %s\n", time, id + 1, settings->arr[state]);
 	if (state == 4)
-			sem_post(settings->ko);
+		time = t;
+	sem_wait(settings->print);
+	printf("%ld %d %s\n", time, id + 1, settings->arr[state]);
+	if (state == 4)
+	{
+		sem_post(settings->ko);
+		settings->progress = 0;
+		exit(1);
+	}
 	else
 		sem_post(settings->print);
 }

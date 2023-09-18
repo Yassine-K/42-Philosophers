@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 13:42:41 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 15:32:06 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,12 +65,11 @@ void	start_eating(t_settings *settings)
 
 void	*routine(void *data)
 {
-	t_settings		*settings;
+	t_settings	*settings;
 
 	settings = (t_settings *) data;
 	if (!(settings->id % 2))
 		usleep(100);
-	settings->rounds = 0;
 	pthread_create(&settings->bouncer, NULL, &bouncer, settings);
 	while (settings->progress)
 	{
@@ -82,10 +81,7 @@ void	*routine(void *data)
 			ft_usleep(settings->time_die, settings);
 			get_time(settings, 2);
 			if (settings->curr - settings->start_sec >= settings->time_die)
-			{
 				print_state(settings->id, settings, 4, settings->curr);
-				settings->progress = 0;
-			}
 		}
 	}
 	return (data);

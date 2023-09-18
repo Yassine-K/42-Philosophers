@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 13:42:30 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 15:32:00 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ void	data_init(t_settings *settings, char **av, int ac)
 	if (ac == 6)
 		settings->num_meals = ft_atoi(av[5]);
 	get_time(settings, 0);
-	settings->start_sec += 300;
 	settings->arr[0] = "is thinking";
 	settings->arr[1] = "has taken a fork";
 	settings->arr[2] = "is eating";
@@ -71,17 +70,19 @@ void	*bouncer(void *data)
 		if (mil - start >= settings->time_die || !settings->progress)
 		{
 			settings->progress = 0;
-			printf("%ld %d %s\n", mil, settings->id, "is dead");
-			break ;
+			print_state(settings->id, settings, 4, mil);
 		}
 	}
 	return (data);
 }
 
-void	sit_arround_table(t_settings *settings, int seats)
+void	sit_arround_table(t_settings *settings)
 {
+	settings->curr = 0;
+	settings->last_meal = 0;
+	settings->rounds = 0;
 	create_proc(settings);
-	wait_for_proc(settings);
+	//wait_for_proc(settings);
 }
 
 int	main(int ac, char **av)
@@ -95,7 +96,7 @@ int	main(int ac, char **av)
 	}
 	settings = (t_settings *) malloc(sizeof(t_settings));
 	data_init(settings, av, ac);
-	sit_arround_table(settings, settings->nbr_phil);
+	sit_arround_table(settings);
 	no_cash_to_pay(settings);
 	return (0);
 }

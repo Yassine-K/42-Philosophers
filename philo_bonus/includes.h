@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:24 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 13:16:04 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 15:17:33 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ typedef struct s_settings{
 	time_t			start_sec;
 	time_t			last_meal;
 	time_t			curr;
+	time_t			delay;
 	pthread_t		bouncer;
 	pid_t			*pids;
 }	t_settings;
