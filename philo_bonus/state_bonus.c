@@ -6,11 +6,12 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 16:39:59 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 18:28:38 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/_types/_pid_t.h>
 #include <sys/semaphore.h>
@@ -52,14 +53,7 @@ void	start_eating(t_settings *settings)
 			print_state(settings->id, settings, 3, settings->curr);
 			if (settings->progress)
 				ft_usleep(settings->time_sleep, settings);
-			if (settings->num_meals && settings->rounds < settings->num_meals)
-			{
-				settings->rounds++;
-				settings->num_rounds++;
-				if (settings->num_rounds >= settings->nbr_phil
-					* settings->num_meals)
-					settings->progress = 0;
-			}
+			settings->num_rounds++;
 		}
 	}
 }
@@ -67,15 +61,14 @@ void	start_eating(t_settings *settings)
 void	*routine(void *data)
 {
 	t_settings		*settings;
-	struct timeval	time;
 
 	settings = (t_settings *) data;
 	if (!(settings->id % 2))
 		usleep(100);
 	while (1)
 	{
-		gettimeofday(&time, NULL);
-		if (time.tv_usec - settings->start_mill < 300)
+		get_time(settings, 2);
+		if (settings->curr - settings->start_sec < 0)
 			usleep(50);
 		else
 		 	break ;
@@ -99,24 +92,39 @@ void	*routine(void *data)
 
 void	create_proc(t_settings *settings)
 {
-	int	i;
+	int		i;
+	pid_t	pid;
 	
 	i = -1;
 	settings->id = -1;
+	settings->start_sec += 300;
 	settings->pids = malloc(sizeof(int) * settings->nbr_phil);
 	while (++settings->id < settings->nbr_phil)
 	{
-		settings->pids[settings->id] = fork();
-		if (!settings->pids[settings->id])
+		pid = fork();
+		if(pid == -1)
+		{
+			printf("gggg\n");
+		}
+		if (!pid)
 			routine(settings);
-		else if (settings->pids[settings->id] < 0)
-			return ;
+		else if(pid > 0)
+			settings->pids[settings->id] = pid;
 		usleep(100);
 	}
 	if (!settings->num_meals)
 		sem_wait(settings->ko);
+	else
+	{
+		i = -1;
+		while (++i < settings->nbr_phil)
+		{
+			sem_wait(settings->pay_now);
+		}
+	}
+	i = -1;
 	while (++i < settings->nbr_phil)
-		kill(settings->pids[i], SIGKILL);
+		kill(settings->pids[i], 15);
 }
 
 void	wait_for_proc(t_settings *settings)

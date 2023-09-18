@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:24 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 16:21:23 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 18:21:13 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ typedef struct s_settings{
 	int				num_rounds;
 	int				id;
 	int				eating;
-	int				rounds;
 	int				progress;
 	char			*arr[5];
 	sem_t			*forks;
@@ -40,7 +39,6 @@ typedef struct s_settings{
 	sem_t			*print;
 	sem_t			*pay_now;
 	time_t			start_sec;
-	time_t			start_mill;
 	time_t			last_meal;
 	time_t			curr;
 	time_t			delay;
