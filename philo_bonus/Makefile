@@ -1,4 +1,4 @@
-SRC = main.c linked_phil_bonus.c state_bonus.c helpers_bonus.c
+SRC = main.c state_bonus.c helpers_bonus.c
 
 OBJ =  ${SRC:.c=.o}
 WWW = -Wall -Wextra -Werror #-fsanitize=thread -g

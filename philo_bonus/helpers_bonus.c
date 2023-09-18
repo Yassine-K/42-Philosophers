@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 21:54:31 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 15:36:58 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 16:43:29 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,14 @@ void	get_time(t_settings *settings, int type)
 
 	gettimeofday(&time, NULL);
 	s = 0;
+	if (type)
+		s = -300;
 	mil = time.tv_sec * 1000 + (time.tv_usec + s) / 1000;
 	if (!type)
+	{
 		settings->start_sec = mil;
+		settings->start_mill = time.tv_usec;
+	}
 	else if (type == 1)
 		settings->last_meal = mil;
 	else if (type == 2)
@@ -86,4 +91,14 @@ void	print_state(int id, t_settings *settings, int state, time_t t)
 	}
 	else
 		sem_post(settings->print);
+}
+
+void	no_cash_to_pay(t_settings *settings)
+{
+	sem_unlink("/Forks");
+	sem_unlink("/Prog");
+	sem_unlink("/Death");
+	sem_unlink("/Print");
+	sem_unlink("/Pay");
+	free(settings);
 }

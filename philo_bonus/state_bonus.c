@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 15:32:06 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 16:39:59 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <sys/_types/_pid_t.h>
 #include <sys/semaphore.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 void	take_forks(t_settings *settings)
@@ -65,11 +66,20 @@ void	start_eating(t_settings *settings)
 
 void	*routine(void *data)
 {
-	t_settings	*settings;
+	t_settings		*settings;
+	struct timeval	time;
 
 	settings = (t_settings *) data;
 	if (!(settings->id % 2))
 		usleep(100);
+	while (1)
+	{
+		gettimeofday(&time, NULL);
+		if (time.tv_usec - settings->start_mill < 300)
+			usleep(50);
+		else
+		 	break ;
+	}
 	pthread_create(&settings->bouncer, NULL, &bouncer, settings);
 	while (settings->progress)
 	{
