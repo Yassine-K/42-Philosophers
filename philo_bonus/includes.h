@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:24 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/03 15:29:15 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 13:16:04 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,21 +16,12 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
+# include <sys/_pthread/_pthread_t.h>
+# include <sys/semaphore.h>
 # include <unistd.h>
 # include <sys/time.h>
 # include <pthread.h>
-
-typedef struct s_single_p{
-	int					id;
-	int					eating;
-	int					rounds;
-	time_t				last_meal;
-	time_t				curr;
-	pthread_mutex_t		mutex;
-	pthread_t			thread;
-	struct s_single_p	*next;
-	struct s_settings	*settings;
-}	t_single_p;
+# include <signal.h>
 
 typedef struct s_settings{
 	int				nbr_phil;
@@ -39,31 +30,30 @@ typedef struct s_settings{
 	int				time_sleep;
 	int				num_meals;
 	int				num_rounds;
-	char			*arr[5];
-	pthread_mutex_t	mutex;
+	int				id;
+	int				eating;
+	int				rounds;
 	int				progress;
+	char			*arr[5];
+	sem_t			*forks;
+	sem_t			*ko;
+	sem_t			*print;
+	sem_t			*pay_now;
 	time_t			start_sec;
-	t_single_p		*philos;
+	time_t			last_meal;
+	time_t			curr;
+	pthread_t		bouncer;
+	pid_t			*pids;
 }	t_settings;
 
-typedef struct s_void_arg{
-	t_settings		*settings;
-	t_single_p		*tmp;
-	pthread_mutex_t	mutex;
-}	t_void_args;
-
-void		add_back(t_single_p **philo_list, t_single_p *new_p);
 void		print_state(int id, t_settings *settings, int state, time_t t);
 void		*routine(void *data);
-void		no_cash_to_pay(t_single_p **philos, int nbr);
-void		create_thread(t_single_p **philos, t_settings *settings);
-void		wait_for_thread(t_single_p **philos);
-void		get_time(void *ptr, int type);
+void		create_proc(t_settings *settings);
+void		wait_for_proc(t_settings *settings);
+void		no_cash_to_pay(t_settings *settings);
+void		get_time(t_settings *settings, int type);
 void		ft_usleep(time_t t, t_settings *t_settings);
-int			check_val(pthread_mutex_t *mtx, int *val);
 int			ft_atoi(char *s);
-t_single_p	*new_phil(int id);
-t_single_p	*find_last(t_single_p *philo_list);
-t_single_p	*find_prev(t_single_p *philo_list, int id);
+void		*bouncer(void *data);
 
 #endif

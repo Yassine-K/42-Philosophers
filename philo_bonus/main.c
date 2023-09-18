@@ -6,11 +6,13 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/16 20:42:02 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 13:42:30 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
+#include <sys/fcntl.h>
+#include <sys/semaphore.h>
 
 void	data_init(t_settings *settings, char **av, int ac)
 {
@@ -18,11 +20,11 @@ void	data_init(t_settings *settings, char **av, int ac)
 	settings->time_die = ft_atoi(av[2]);
 	settings->time_eat = ft_atoi(av[3]);
 	settings->time_sleep = ft_atoi(av[4]);
-	settings->philos = NULL;
+	settings->num_rounds = 0;
+	settings->num_meals = 0;
+	settings->progress = 1;
 	if (ac == 6)
 		settings->num_meals = ft_atoi(av[5]);
-	else
-		settings->num_meals = 0;
 	get_time(settings, 0);
 	settings->start_sec += 300;
 	settings->arr[0] = "is thinking";
@@ -30,9 +32,14 @@ void	data_init(t_settings *settings, char **av, int ac)
 	settings->arr[2] = "is eating";
 	settings->arr[3] = "is sleeping";
 	settings->arr[4] = "died";
-	settings->progress = 1;
-	settings->num_rounds = 0;
-	pthread_mutex_init(&settings->mutex, NULL);
+	sem_unlink("/Forks");
+	sem_unlink("/Death");
+	sem_unlink("/Print");
+	sem_unlink("/Pay");
+	settings->forks = sem_open("/Forks", O_CREAT | O_EXCL, 0644, settings->nbr_phil);
+	settings->print = sem_open("/Death", O_CREAT | O_EXCL, 0644, 1);
+	settings->ko = sem_open("/Print", O_CREAT | O_EXCL, 0644, 0);
+	settings->pay_now = sem_open("/Pay", O_CREAT | O_EXCL, 0644);
 }
 
 int	check_errors(char **av)
@@ -46,55 +53,35 @@ int	check_errors(char **av)
 	return (1);
 }
 
-void	bouncer(t_settings *settings)
+void	*bouncer(void *data)
 {
-	t_single_p		*tmp;
 	struct timeval	time;
+	t_settings		*settings;
 	time_t			mil;
 	time_t			start;
 
-	tmp = settings->philos;
-	while (check_val(&settings->mutex, &settings->progress))
+	settings = (t_settings *) data;
+	while (1)
 	{
 		gettimeofday(&time, NULL);
 		mil = time.tv_sec * 1000 + time.tv_usec / 1000 - settings->start_sec;
-		pthread_mutex_lock(&tmp->mutex);
-		start = tmp->last_meal - settings->start_sec;
-		pthread_mutex_unlock(&tmp->mutex);
+		start = settings->last_meal - settings->start_sec;
 		if (start < 0)
 			start = 0;
-		if (mil - start >= settings->time_die)
+		if (mil - start >= settings->time_die || !settings->progress)
 		{
-			pthread_mutex_lock(&settings->mutex);
 			settings->progress = 0;
-			pthread_mutex_unlock(&settings->mutex);
-			printf("%ld %d %s\n", mil, tmp->id, "is dead");
+			printf("%ld %d %s\n", mil, settings->id, "is dead");
+			break ;
 		}
-		else
-			tmp = tmp->next;
 	}
+	return (data);
 }
 
 void	sit_arround_table(t_settings *settings, int seats)
 {
-	int			i;
-
-	i = -1;
-	while (++i < seats)
-	{
-		add_back(&settings->philos, new_phil(i + 1));
-		if (!settings->philos)
-			break ;
-	}
-	if (settings->philos)
-	{
-		pthread_mutex_lock(&settings->mutex);
-		find_last(settings->philos)->next = settings->philos;
-		pthread_mutex_unlock(&settings->mutex);
-		create_thread(&settings->philos, settings);
-		bouncer(settings);
-		wait_for_thread(&settings->philos);
-	}
+	create_proc(settings);
+	wait_for_proc(settings);
 }
 
 int	main(int ac, char **av)
@@ -109,14 +96,6 @@ int	main(int ac, char **av)
 	settings = (t_settings *) malloc(sizeof(t_settings));
 	data_init(settings, av, ac);
 	sit_arround_table(settings, settings->nbr_phil);
-	if (!settings->philos)
-	{
-		no_cash_to_pay(&settings->philos, settings->nbr_phil);
-		pthread_mutex_destroy(&settings->mutex);
-		return (2);
-	}
-	pthread_mutex_destroy(&settings->mutex);
-	no_cash_to_pay(&settings->philos, settings->nbr_phil);
-	free(settings);
+	no_cash_to_pay(settings);
 	return (0);
 }

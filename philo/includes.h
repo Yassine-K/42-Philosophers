@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:24 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/03 15:29:15 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/16 21:31:59 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,6 @@ typedef struct s_settings{
 	time_t			start_sec;
 	t_single_p		*philos;
 }	t_settings;
-
-typedef struct s_void_arg{
-	t_settings		*settings;
-	t_single_p		*tmp;
-	pthread_mutex_t	mutex;
-}	t_void_args;
 
 void		add_back(t_single_p **philo_list, t_single_p *new_p);
 void		print_state(int id, t_settings *settings, int state, time_t t);

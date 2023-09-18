@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/16 20:40:23 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/16 21:30:30 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,9 @@ void	data_init(t_settings *settings, char **av, int ac)
 	settings->time_eat = ft_atoi(av[3]);
 	settings->time_sleep = ft_atoi(av[4]);
 	settings->philos = NULL;
+	settings->num_meals = 0;
 	if (ac == 6)
 		settings->num_meals = ft_atoi(av[5]);
-	else
-		settings->num_meals = 0;
 	get_time(settings, 0);
 	settings->arr[0] = "is thinking";
 	settings->arr[1] = "has taken a fork";

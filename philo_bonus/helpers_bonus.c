@@ -1,16 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   helpers.c                                          :+:      :+:    :+:   */
+/*   helpers_bonus.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/23 21:54:31 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/11 16:29:58 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 13:43:43 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
+#include <sys/semaphore.h>
 
 void	ft_usleep(time_t t, t_settings *settings)
 {
@@ -21,9 +22,9 @@ void	ft_usleep(time_t t, t_settings *settings)
 	gettimeofday(&time, NULL);
 	now = time.tv_sec * 1000 + time.tv_usec / 1000 - settings->start_sec;
 	later = now + t;
-	while (now < later && check_val(&settings->mutex, &settings->progress))
+	while (now < later && settings->progress)
 	{
-		if (!check_val(&settings->mutex, &settings->progress))
+		if (!settings->progress)
 			break ;
 		usleep(100);
 		gettimeofday(&time, NULL);
@@ -51,38 +52,19 @@ int	ft_atoi(char *s)
 	return (res);
 }
 
-void	get_time(void *ptr, int type)
+void	get_time(t_settings *settings, int type)
 {
-	t_settings		*settings;
-	t_single_p		*phil;
 	struct timeval	time;
 	time_t			mil;
 
 	gettimeofday(&time, NULL);
 	mil = time.tv_sec * 1000 + time.tv_usec / 1000;
-	if (type)
-	{
-		phil = (t_single_p *) ptr;
-		if (type == 1)
-			phil->last_meal = mil;
-		else if (type == 2)
-			phil->curr = mil;
-	}
-	else
-	{
-		settings = (t_settings *) ptr;
+	if (!type)
 		settings->start_sec = mil;
-	}
-}
-
-int	check_val(pthread_mutex_t *mtx, int *val)
-{
-	int	ret;
-
-	pthread_mutex_lock(mtx);
-	ret = *val;
-	pthread_mutex_unlock(mtx);
-	return (ret);
+	else if (type == 1)
+		settings->last_meal = mil;
+	else if (type == 2)
+		settings->curr = mil;
 }
 
 void	print_state(int id, t_settings *settings, int state, time_t t)
@@ -90,6 +72,11 @@ void	print_state(int id, t_settings *settings, int state, time_t t)
 	time_t	time;
 
 	time = t - settings->start_sec;
-	if (check_val(&settings->mutex, &settings->progress))
-		printf("%ld %d %s\n", time, id, settings->arr[state]);
+	sem_wait(settings->print);
+	if (settings->progress)
+		printf("%ld %d %s\n", time, id + 1, settings->arr[state]);
+	if (state == 4)
+			sem_post(settings->ko);
+	else
+		sem_post(settings->print);
 }

@@ -1,61 +1,63 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   state.c                                            :+:      :+:    :+:   */
+/*   state_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/11 16:28:50 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/18 13:42:41 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "includes.h"
+#include <stdlib.h>
+#include <sys/_types/_pid_t.h>
+#include <sys/semaphore.h>
+#include <unistd.h>
 
-void	take_forks(t_single_p *tmp, t_settings *settings)
+void	take_forks(t_settings *settings)
 {
-	if (check_val(&settings->mutex, &settings->progress))
+	if (settings->progress)
 	{
-		get_time(tmp, 2);
-		print_state(tmp->id, settings, 0, tmp->curr);
-		get_time(tmp, 2);
-		print_state(tmp->id, settings, 1, tmp->curr);
+		get_time(settings, 2);
+		print_state(settings->id, settings, 0, settings->curr);
+		get_time(settings, 2);
+		print_state(settings->id, settings, 1, settings->curr);
 		if (settings->nbr_phil > 1)
 		{
-			pthread_mutex_lock(&find_prev(tmp, tmp->id)->mutex);
-			pthread_mutex_lock(&tmp->mutex);
-			get_time(tmp, 2);
-			print_state(tmp->id, settings, 1, tmp->curr);
-			tmp->eating = 1;
-			get_time(tmp, 1);
-			print_state(tmp->id, settings, 2, tmp->curr);
+			sem_wait(settings->forks);
+			sem_wait(settings->forks);
+			get_time(settings, 2);
+			print_state(settings->id, settings, 1, settings->curr);
+			settings->eating = 1;
+			get_time(settings, 1);
+			print_state(settings->id, settings, 2, settings->curr);
 			ft_usleep(settings->time_eat, settings);
-			pthread_mutex_unlock(&tmp->mutex);
-			pthread_mutex_unlock(&find_prev(tmp, tmp->id)->mutex);
+			sem_post(settings->forks);
+			sem_post(settings->forks);
 		}
 	}
 }
 
-void	start_eating(t_single_p *tmp, t_settings *settings)
+void	start_eating(t_settings *settings)
 {
-	if (check_val(&settings->mutex, &settings->progress))
+	if (settings->progress)
 	{
-		if (tmp->eating)
+		if (settings->eating)
 		{
-			tmp->eating = 0;
-			get_time(tmp, 2);
-			print_state(tmp->id, settings, 3, tmp->curr);
-			if (check_val(&settings->mutex, &settings->progress))
+			settings->eating = 0;
+			get_time(settings, 2);
+			print_state(settings->id, settings, 3, settings->curr);
+			if (settings->progress)
 				ft_usleep(settings->time_sleep, settings);
-			if (settings->num_meals && tmp->rounds < settings->num_meals)
+			if (settings->num_meals && settings->rounds < settings->num_meals)
 			{
-				tmp->rounds++;
-				pthread_mutex_lock(&settings->mutex);
+				settings->rounds++;
 				settings->num_rounds++;
 				if (settings->num_rounds >= settings->nbr_phil
 					* settings->num_meals)
 					settings->progress = 0;
-				pthread_mutex_unlock(&settings->mutex);
 			}
 		}
 	}
@@ -64,25 +66,24 @@ void	start_eating(t_single_p *tmp, t_settings *settings)
 void	*routine(void *data)
 {
 	t_settings		*settings;
-	t_single_p		*tmp;
 
-	tmp = (t_single_p *) data;
-	pthread_mutex_lock(&tmp->settings->mutex);
-	settings = tmp->settings;
-	pthread_mutex_unlock(&tmp->settings->mutex);
-	if (!(tmp->id % 2))
+	settings = (t_settings *) data;
+	if (!(settings->id % 2))
 		usleep(100);
-	while (check_val(&settings->mutex, &settings->progress))
+	settings->rounds = 0;
+	pthread_create(&settings->bouncer, NULL, &bouncer, settings);
+	while (settings->progress)
 	{
-		take_forks(tmp, settings);
-		start_eating(tmp, settings);
+		settings->eating = 0;
+		take_forks(settings);
+		start_eating(settings);
 		if (settings->nbr_phil == 1)
 		{
 			ft_usleep(settings->time_die, settings);
-			get_time(tmp, 2);
-			if (tmp->curr - settings->start_sec >= settings->time_die)
+			get_time(settings, 2);
+			if (settings->curr - settings->start_sec >= settings->time_die)
 			{
-				print_state(tmp->id, settings, 4, tmp->curr);
+				print_state(settings->id, settings, 4, settings->curr);
 				settings->progress = 0;
 			}
 		}
@@ -90,40 +91,34 @@ void	*routine(void *data)
 	return (data);
 }
 
-void	create_thread(t_single_p **philos, t_settings *settings)
+void	create_proc(t_settings *settings)
 {
-	int			max;
-	t_single_p	*tmp;
-
-	max = 0;
-	tmp = *philos;
-	while (tmp && ++max == tmp->id)
+	int	i;
+	
+	i = -1;
+	settings->id = -1;
+	settings->pids = malloc(sizeof(int) * settings->nbr_phil);
+	while (++settings->id < settings->nbr_phil)
 	{
-		pthread_mutex_lock(&settings->mutex);
-		tmp->settings = settings;
-		pthread_mutex_unlock(&settings->mutex);
-		if (pthread_create(&tmp->thread, NULL, &routine, tmp))
-			philos = NULL;
-		if (!philos)
-			break ;
+		settings->pids[settings->id] = fork();
+		if (!settings->pids[settings->id])
+			routine(settings);
+		else if (settings->pids[settings->id] < 0)
+			return ;
 		usleep(100);
-		tmp = tmp->next;
 	}
+	if (!settings->num_meals)
+		sem_wait(settings->ko);
+	while (++i < settings->nbr_phil)
+		kill(settings->pids[i], SIGKILL);
 }
 
-void	wait_for_thread(t_single_p **philos)
+void	wait_for_proc(t_settings *settings)
 {
-	t_single_p	*tmp;
-	int			max;
+	int	i;
+	int	status;
 
-	max = 0;
-	tmp = *philos;
-	while (tmp && ++max == tmp->id)
-	{
-		if (pthread_join(tmp->thread, NULL))
-			philos = NULL;
-		if (!philos)
-			break ;
-		tmp = tmp->next;
-	}
+	i = -1;
+	while (++i < settings->nbr_phil)
+		waitpid(settings->pids[i], &status, 0);
 }
