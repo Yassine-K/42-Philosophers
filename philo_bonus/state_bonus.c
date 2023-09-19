@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/22 16:08:22 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 18:28:38 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/19 17:18:18 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ void	*routine(void *data)
 	{
 		get_time(settings, 2);
 		if (settings->curr - settings->start_sec < 0)
-			usleep(50);
+			usleep((-settings->curr + settings->start_sec) *499);
 		else
 		 	break ;
 	}
@@ -110,7 +110,7 @@ void	create_proc(t_settings *settings)
 			routine(settings);
 		else if(pid > 0)
 			settings->pids[settings->id] = pid;
-		usleep(100);
+		usleep(50);
 	}
 	if (!settings->num_meals)
 		sem_wait(settings->ko);
