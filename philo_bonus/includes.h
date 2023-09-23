@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:24 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 18:21:13 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/23 16:10:33 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,11 @@ typedef struct s_settings{
 void		print_state(int id, t_settings *settings, int state, time_t t);
 void		*routine(void *data);
 void		create_proc(t_settings *settings);
-void		wait_for_proc(t_settings *settings);
 void		no_cash_to_pay(t_settings *settings);
 void		get_time(t_settings *settings, int type);
 void		ft_usleep(time_t t, t_settings *t_settings);
 int			ft_atoi(char *s);
 void		*bouncer(void *data);
+void		my_sem(sem_t *sem, int nbr, int (*ft_sem) (sem_t *));
 
 #endif

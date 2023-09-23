@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/18 18:27:28 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/23 16:11:15 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,10 @@ void	data_init(t_settings *settings, char **av, int ac)
 	sem_unlink("/Death");
 	sem_unlink("/Print");
 	sem_unlink("/Pay");
-	settings->forks = sem_open("/Forks", O_CREAT | O_EXCL, 0644, settings->nbr_phil);
-	settings->print = sem_open("/Death", O_CREAT | O_EXCL, 0644, 1);
-	settings->ko = sem_open("/Print", O_CREAT | O_EXCL, 0644, 0);
+	settings->forks = sem_open("/Forks", O_CREAT
+			| O_EXCL, 0644, settings->nbr_phil);
+	settings->print = sem_open("/Print", O_CREAT | O_EXCL, 0644, 1);
+	settings->ko = sem_open("/Death", O_CREAT | O_EXCL, 0644, 0);
 	settings->pay_now = sem_open("/Pay", O_CREAT | O_EXCL, 0644, 0);
 }
 
@@ -58,7 +59,6 @@ void	*bouncer(void *data)
 	t_settings		*settings;
 	time_t			mil;
 	time_t			start;
-	int				i;
 
 	settings = (t_settings *) data;
 	while (1)
@@ -73,18 +73,11 @@ void	*bouncer(void *data)
 			settings->progress = 0;
 			print_state(settings->id, settings, 4, mil);
 			if (settings->num_meals)
-			{
-				i = -1;
-				while (++i < settings->nbr_phil)
-				{
-					sem_post(settings->pay_now);
-				}
-			}
+				my_sem(settings->pay_now, settings->nbr_phil, sem_post);
 		}
-		else if (settings->num_meals && settings->num_rounds >= settings->num_meals)
-		{
+		else if (settings->num_meals
+			&& settings->num_rounds >= settings->num_meals)
 			sem_post(settings->pay_now);
-		}
 	}
 	return (data);
 }
@@ -94,7 +87,6 @@ void	sit_arround_table(t_settings *settings)
 	settings->curr = 0;
 	settings->last_meal = 0;
 	create_proc(settings);
-	//wait_for_proc(settings);
 }
 
 int	main(int ac, char **av)
