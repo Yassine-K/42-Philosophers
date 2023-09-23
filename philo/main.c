@@ -6,7 +6,7 @@
 /*   By: ykhayri <ykhayri@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/21 12:52:00 by ykhayri           #+#    #+#             */
-/*   Updated: 2023/09/16 21:30:30 by ykhayri          ###   ########.fr       */
+/*   Updated: 2023/09/23 17:15:14 by ykhayri          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,9 +56,9 @@ void	bouncer(t_settings *settings)
 	{
 		gettimeofday(&time, NULL);
 		mil = time.tv_sec * 1000 + time.tv_usec / 1000 - settings->start_sec;
-		pthread_mutex_lock(&tmp->mutex);
+		pthread_mutex_lock(&settings->mutex);
 		start = tmp->last_meal - settings->start_sec;
-		pthread_mutex_unlock(&tmp->mutex);
+		pthread_mutex_unlock(&settings->mutex);
 		if (start < 0)
 			start = 0;
 		if (mil - start >= settings->time_die)
